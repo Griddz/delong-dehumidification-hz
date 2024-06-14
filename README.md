@@ -1,5 +1,5 @@
 ## 德龙除湿机改造，通过ESPhome控制接入homeassistant
-![1](/截屏2024-06-14 14.07.28.png)
+![1](https://github.com/Griddz/delong-dehumidification-hz/blob/main/%E6%88%AA%E5%B1%8F2024-06-14%2014.07.28.png)
 ###德龙除湿机照片
 ![3](image/21.jpeg)
 ### 电压测量记录：
