@@ -1,5 +1,15 @@
-## 德龙除温机改造，通过ESPhome控制接入homeassistant
+## 德龙除湿机改造，通过ESPhome控制接入homeassistant
 ![1](https://github.com/Griddz/delong-dehumidification-hz/blob/main/%E6%88%AA%E5%B1%8F2024-06-14%2014.07.28.png)
+### 电压测量记录：
+![2](image/12pin插头电压测量记录.png)
+根据电压测量记录得出各针高电平时的状态：
+- **pin1:水满状态**
+- **pin6:水泵正在储水状态**
+- **pin7:水泵排水状态**
+- **pin8:风扇高档状态**
+- **pin9:风扇低档状态**
+- **pin10:化霜状态**
+- 
 ### 材料：
 1. 德龙除湿机型号：DD30P
 2. 配件：
