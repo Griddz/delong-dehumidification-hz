@@ -1,5 +1,5 @@
 ## 德龙除温机改造，通过ESPhome控制接入homeassistant
-!.[设备界面].()
+![1](https://github.com/Griddz/delong-dehumidification-hz/blob/main/%E6%88%AA%E5%B1%8F2024-06-14%2014.07.28.png)
 ### 材料：
 1. 德龙除湿机型号：DD30P
 2. 配件：
