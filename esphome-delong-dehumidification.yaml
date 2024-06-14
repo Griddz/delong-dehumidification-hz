@@ -1,0 +1,473 @@
+
+substitutions:
+  name: dehumidification-delong-hz
+  friendly_name: 德龙除湿机-杭州
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+  on_boot:
+    priority: -100
+    then:
+  #尽快输出高电平，反转单向电平转换模块的转换方向。
+      - output.turn_on: DIR_high
+ #     取消了来电自启除湿机的功能。
+      - delay: 1s
+      - switch.turn_off: relay_power
+
+
+esp32:
+  board: esp32dev
+
+logger:
+  level: debug  #You Can Use "INFO" Level
+  baud_rate: 0
+  
+  # Enable Home Assistant API
+api:
+  
+ota:
+  
+  
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+    # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "dehumidification-delong-hz"
+     
+captive_portal:
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:  
+
+
+#配置单向电平转换模块的输出方向
+output:
+  - platform: gpio
+    pin:
+      number: GPIO22 # 更改为你想要设置为高电平的引脚
+    inverted: True  
+    id: DIR_high
+
+#在启动时设置引脚为高电平
+
+
+switch:
+  - platform: template
+    name: "1Power"
+    lambda: |-
+      if (id(machine_is_on).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - if:
+          condition:
+            binary_sensor.is_off: machine_is_on
+          then:
+            - switch.turn_on: button_power
+    turn_off_action:
+      - if:
+          condition:
+            binary_sensor.is_on: machine_is_on
+          then:
+            - switch.turn_on: button_power    
+    id: relay_power
+    
+  # - platform: template
+  #   name: "2Pump"
+  #   lambda: |-
+  #     if (id(pump_is_on).state) {
+  #       return true;
+  #     } else {
+  #       return false;
+  #     }
+  #   turn_on_action:
+  #     - if:
+  #         condition:
+  #           binary_sensor.is_off: pump_is_on
+  #         then:
+  #           - switch.turn_on: button_pump    
+
+  #   turn_off_action:
+  #     - if:
+  #         condition:
+  #           binary_sensor.is_on: pump_is_on
+  #         then:
+  #           - switch.turn_on: button_pump        
+  #   id: relay_pump
+
+  - platform: template
+    name: "3Fan_high"
+    lambda: |-
+      if (id(fan_high_is_on).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - if:
+          condition:
+            binary_sensor.is_off: fan_high_is_on
+          then:
+            - switch.turn_on: button_fan        
+    turn_off_action:
+      - if:
+          condition:
+            binary_sensor.is_on: fan_high_is_on
+          then:
+            - switch.turn_on: button_fan            
+    id: relay_fan_high    
+
+  - platform: template
+    name: "4Fan_low"
+    lambda: |-
+      if (id(fan_low_is_on).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - if:
+          condition:
+            binary_sensor.is_off: fan_low_is_on
+          then:
+            - switch.turn_on: button_fan        
+    turn_off_action:
+      - if:
+          condition:
+            binary_sensor.is_on: fan_low_is_on
+          then:
+            - switch.turn_on: button_fan            
+    id: relay_fan_low        
+
+  - platform: gpio
+    pin: GPIO16
+    name: power_button
+    id: button_power
+    internal: True
+    on_turn_on:
+    - delay: 166ms
+    - switch.turn_off: button_power
+
+
+  - platform: gpio
+    pin: GPIO17
+    name: fan_button
+    id: button_fan
+    internal: True
+    on_turn_on:
+    - delay: 166ms
+    - switch.turn_off: button_fan
+
+  - platform: gpio
+    pin: GPIO18
+    name: pump_button
+    id: button_pump
+    #internal: True    
+    on_turn_on:
+    - delay: 166ms
+    - switch.turn_off: button_pump
+
+  - platform: gpio
+    pin: GPIO19
+    name: plus_button
+    id: button_plus
+    internal: True
+    on_turn_on:
+    - delay: 166ms
+    - switch.turn_off: button_plus
+
+  - platform: gpio
+    pin: GPIO21
+    name: sub_button
+    id: button_sub
+    internal: True
+    on_turn_on:
+    - delay: 166ms
+    - switch.turn_off: button_sub
+
+
+binary_sensor:
+  - platform: template
+    name: "81machine_is_on"
+    lambda: |-
+      if (!id(compressor_is_on).state && !id(pump_draining).state && !id(waterfull_is_on).state && !id(fan_low_is_on).state && !id(fan_high_is_on).state ) {
+        return false;  // 实体状态为off
+      } else {
+        return true;   // 实体状态为on
+      }
+    id: machine_is_on
+    # filters:
+    #   - delayed_on: 5s
+    device_class: power    
+  # - platform: template
+  #   id: pump_is_on
+  #   lambda: |-
+  #     if (!id(pump_draining).state && !id(pump_water_accumulation).state ) {
+  #       return false;  // 实体状态为off
+  #     } else {
+  #       return true;   // 实体状态为on
+  #     }
+  #   filters:
+  #     - delayed_off: 200ms      
+
+  #   name: 82pump_is_on
+  #   device_class: running 
+
+  - platform: gpio
+    id: pump_draining
+    pin:
+      number: GPIO23
+     # inverted: true
+      mode:
+        input: true
+        pulldown: true
+    name: 89pump_draining
+    device_class: running 
+  - platform: gpio
+    id: waterfull_is_on
+    pin:
+      number: GPIO13
+   #   inverted: true
+      mode:
+        input: true
+        pulldown: true
+    name: 83waterfull_is_on
+    device_class: running 
+  - platform: gpio
+    id: fan_high_is_on
+    pin:
+      number: GPIO26
+  #    inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: 84fan_high_is_on
+    device_class: running     
+  - platform: gpio
+    id: fan_low_is_on
+    pin:
+      number: GPIO27
+  #    inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: 85fan_low_is_on
+    device_class: running     
+  - platform: template
+    name: "86defroze"
+    lambda: |-
+      if (!id(compressor_is_on).state && !id(waterfull_is_on).state && id(fan_low_is_on).state) {
+        return true;  // 实体状态为on
+      } else {
+        return false;   // 实体状态为 off
+      }
+    id: defroze
+    device_class: running
+
+  - platform: gpio
+    id: compressor_is_on
+    pin:
+      number: GPIO14
+ #     inverted: true
+      mode:
+        input: true
+        pulldown: true
+    name: 87compressor_is_on
+    device_class: power     
+
+  - platform: gpio
+    id: pump_water_accumulation
+    pin:
+      number: GPIO25
+     # inverted: true
+      mode:
+        input: true
+        pulldown: true
+    name: 88pump_water_accumulation
+    device_class: running 
+
+  
+
+sensor:    
+  - platform: wifi_signal
+    name: delon-dehumidification-hz-WiFi Signal
+    update_interval: 60s    
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: delon-dehumidification-hz-IP Address       
+
+button: 
+  - platform: restart
+    name: delong-dehumidification-hz-Restart     
+
+  - platform: template
+    name: "Humidity_40"
+    id: humidity_40
+    internal: True      
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms
+      - repeat:
+          count: 3
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms    
+ 
+  - platform: template
+    name: "Humidity_45"
+    id: humidity_45 
+    internal: True      
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms
+      - repeat:
+          count: 4
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms    
+ 
+  - platform: template
+    name: "Humidity_50"
+    id: humidity_50 
+    internal: True    
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms
+      - repeat:
+          count: 5
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms        
+  - platform: template
+    name: "Humidity_55"
+    internal: True    
+    id: humidity_55 
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms
+      - repeat:
+          count: 5
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms                    
+  - platform: template
+    name: "Humidity_60"
+    id: humidity_60 
+    internal: True    
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms
+      - repeat:
+          count: 4
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms         
+  - platform: template
+    name: "Humidity_65"
+    id: humidity_65 
+    internal: True    
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms
+      - repeat:
+          count: 3
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms             
+  - platform: template
+    name: "Humidity_70"
+    id: humidity_70 
+    internal: True    
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms
+      - repeat:
+          count: 2
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms                             
+  - platform: template
+    name: "Humidity_75"
+    id: humidity_75 
+    internal: True    
+    on_press:
+      - repeat:
+          count: 11
+          then:
+            - switch.turn_on: button_plus
+            - delay: 500ms
+      - repeat:
+          count: 1
+          then:
+            - switch.turn_on: button_sub
+            - delay: 500ms                                                 
+
+# Define the select component for set humidity  through Home Assistant
+select:
+  - platform: template
+    name: "Humidity Select"
+    id: humidity_select
+    optimistic: true
+    initial_option: -- 设定温度值 --
+    options:
+      - "-- 设定温度值 --"
+      - "40"
+      - "45"
+      - "50"
+      - "55"
+      - "60"
+      - "65"
+      - "70"
+      - "75"
+#    initial_option: "50"
+    on_value:
+      - lambda: |-
+          if(x == "40") {
+            id(humidity_40).press();
+          } else if(x == "45") {
+            id(humidity_45).press();  
+          } else if(x == "50") {
+            id(humidity_50).press();
+          }else if(x == "55") {
+            id(humidity_55).press();
+          }else if(x == "60") {
+            id(humidity_60).press();
+          }else if(x == "65") {
+            id(humidity_65).press();
+          }else if(x == "70") {
+            id(humidity_70).press();
+          }else if(x == "75") {
+            id(humidity_75).press();
+          }
