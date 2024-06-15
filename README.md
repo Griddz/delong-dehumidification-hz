@@ -1,4 +1,4 @@
-## 德龙除湿机改造，通过ESPhome控制接入homeassistant
+## 德龙除湿机DD30P改造，通过ESPhome控制接入homeassistant
 ![1](https://github.com/Griddz/delong-dehumidification-hz/blob/main/%E6%88%AA%E5%B1%8F2024-06-14%2014.07.28.png)
 ### 德龙除湿机照片
 ![3](https://github.com/Griddz/delong-dehumidification-hz/blob/68925bcedc6171949328a0cf1243ec6983e5d9fe/image/IMG_1312%20%E5%A4%A7.png)
@@ -36,7 +36,7 @@
 #### 电平转换器引脚：
 1. DIR引脚 <---------> GPIO22
 #### 图片
-![22](https://github.com/Griddz/delong-dehumidification-hz/blob/ccd5cdc13bc65598f94d9fe02108713f1a27075d/image/22-total.jpg)
+!.[22].(https://github.com/Griddz/delong-dehumidification-hz/blob/ccd5cdc13bc65598f94d9fe02108713f1a27075d/image/22-total.jpg)
 ![23](https://github.com/Griddz/delong-dehumidification-hz/blob/ccd5cdc13bc65598f94d9fe02108713f1a27075d/image/23-12pin.jpg)
 ![25](https://github.com/Griddz/delong-dehumidification-hz/blob/ccd5cdc13bc65598f94d9fe02108713f1a27075d/image/25-pcb.jpg)
 ![26](https://github.com/Griddz/delong-dehumidification-hz/blob/ccd5cdc13bc65598f94d9fe02108713f1a27075d/image/26-solderline.jpg)
